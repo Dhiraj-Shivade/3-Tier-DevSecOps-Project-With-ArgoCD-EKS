@@ -27,7 +27,8 @@ pipeline {
                     withSonarQubeEnv('sonar-server') {
                         sh ''' $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=Backend \
-                        -Dsonar.projectKey=Backend '''
+                        -Dsonar.projectKey=Backend 
+                        -Dsonar.login=$SONAR_TOKEN '''
                     }
                 }
             }
@@ -95,6 +96,7 @@ pipeline {
                         sh '''
                             git config user.email "dhiraj.shivade1@gmail.com"
                             git config user.name "Dhiraj-Shivade"
+                            git remote set-url origin https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git
                             BUILD_NUMBER=${BUILD_NUMBER}
                             echo $BUILD_NUMBER
                             imageTag=$(grep -oP '(?<=backend:)[^ ]+' deployment.yaml)
@@ -102,7 +104,7 @@ pipeline {
                             sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" deployment.yaml
                             git add deployment.yaml
                             git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
-                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
+                            git push origin HEAD:master
                         '''
                     }
                 }
